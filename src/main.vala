@@ -31,7 +31,13 @@ public class NovaApp : Gtk.Application {
         Object(application_id: "org.novaos.panel", flags: ApplicationFlags.FLAGS_NONE);
     }
     
+    protected override void startup() {
+        base.startup();
+        Debug.log("App", "startup() called");
+    }
+    
     protected override void activate() {
+        Debug.log("App", "activate() called");
         Debug.log("App", "Loading theme...");
         Settings.load_saved_theme();
         Debug.log("App", "Creating panel...");
@@ -50,7 +56,18 @@ public class NovaApp : Gtk.Application {
             print("GDK_BACKEND: %s\n", Environment.get_variable("GDK_BACKEND") ?? "(not set)");
             print("XDG_SESSION_TYPE: %s\n", Environment.get_variable("XDG_SESSION_TYPE") ?? "(not set)");
         }
+        // Filter out verbose flags before passing to GTK
+        string[] filtered = {};
+        foreach (var arg in args) {
+            if (arg != "-v" && arg != "--verbose") {
+                filtered += arg;
+            }
+        }
+        Debug.log("Main", "Creating application...");
         var app = new NovaApp();
-        return app.run(args);
+        Debug.log("Main", "Calling app.run()...");
+        int status = app.run(filtered);
+        Debug.log("Main", "app.run() returned %d".printf(status));
+        return status;
     }
 }
